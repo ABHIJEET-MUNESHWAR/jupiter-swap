@@ -1,0 +1,92 @@
+{
+  "info": {
+    "_postman_id": "8f5c1f08-1e6a-4ad0-9f6e-ultra2026",
+    "name": "Jupiter Swap (Ultra) — GraphQL",
+    "description": "Smoke tests for the @jupiter-swap/api GraphQL service wrapping Jupiter Ultra /order and /execute. Set the `baseUrl`, `inputMint`, `outputMint`, `taker`, `amount` env vars first.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/graphql",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"query\":\"query { health { status version uptimeMs } }\"}"
+        }
+      }
+    },
+    {
+      "name": "Create Order",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "const json = pm.response.json();",
+            "if (json.data && json.data.createOrder) {",
+            "  pm.environment.set('requestId', json.data.createOrder.requestId);",
+            "  pm.environment.set('transaction', json.data.createOrder.transaction);",
+            "}"
+          ]
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/graphql",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"query\":\"mutation($i: CreateOrderInput!){ createOrder(input:$i){ requestId transaction inAmount outAmount priceImpactPct status } }\",\"variables\":{\"i\":{\"inputMint\":\"{{inputMint}}\",\"outputMint\":\"{{outputMint}}\",\"amount\":\"{{amount}}\",\"taker\":\"{{taker}}\",\"slippageBps\":50}}}"
+        }
+      }
+    },
+    {
+      "name": "Execute Order",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/graphql",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"query\":\"mutation($i: ExecuteOrderInput!){ executeOrder(input:$i){ status signature error } }\",\"variables\":{\"i\":{\"requestId\":\"{{requestId}}\",\"signedTransaction\":\"{{signedTransaction}}\"}}}"
+        }
+      }
+    },
+    {
+      "name": "Get Order",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/graphql",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"query\":\"query($id: ID!){ getOrder(requestId:$id){ requestId status outAmount } }\",\"variables\":{\"id\":\"{{requestId}}\"}}"
+        }
+      }
+    },
+    {
+      "name": "Ask Assistant",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/graphql",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"query\":\"mutation { askAssistant(prompt:\\\"swap 0.1 SOL to USDC at 0.25% slippage\\\") { message parsedOrder { inputMint outputMint amount slippageBps } } }\"}"
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "inputMint", "value": "So11111111111111111111111111111111111111112" },
+    { "key": "outputMint", "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" },
+    { "key": "amount", "value": "10000000" },
+    { "key": "taker", "value": "REPLACE_WITH_WALLET_PUBKEY" },
+    { "key": "signedTransaction", "value": "REPLACE_WITH_BASE64_SIGNED_TX" }
+  ]
+}
+

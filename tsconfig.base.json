@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "incremental": true,
+    "useDefineForClassFields": true,
+    "verbatimModuleSyntax": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@jupiter-swap/core": ["packages/core/src/index.ts"],
+      "@jupiter-swap/core/*": ["packages/core/src/*"],
+      "@jupiter-swap/agents": ["packages/agents/src/index.ts"],
+      "@jupiter-swap/config": ["packages/config/src/index.ts"]
+    }
+  }
+}
+

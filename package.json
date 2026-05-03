@@ -1,25 +1,35 @@
 {
   "name": "jupiter-swap",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "Full-stack Jupiter Ultra Swap platform (Next.js + GraphQL + GenAI) — clean/hexagonal architecture, CQRS + Saga.",
+  "license": "MIT",
+  "packageManager": "pnpm@9.7.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "dependencies": {
-    "@project-serum/anchor": "^0.26.0",
-    "@solana/web3.js": "^1.98.4",
-    "bs58": "^6.0.0",
-    "cross-fetch": "^4.1.0",
-    "dotenv": "^17.4.0"
+    "dev:api": "pnpm --filter @jupiter-swap/api dev",
+    "dev:web": "pnpm --filter @jupiter-swap/web dev",
+    "build": "pnpm -r --filter \"./packages/*\" build && pnpm -r --filter \"./apps/*\" build",
+    "test": "pnpm -r test",
+    "test:cov": "pnpm -r test:cov",
+    "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\" --max-warnings=0",
+    "typecheck": "pnpm -r typecheck",
+    "bench": "tsx benchmarks/run.ts",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,yml,yaml}\""
   },
   "devDependencies": {
-    "@types/node": "^25.5.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.2"
+    "@types/node": "^20.12.12",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "tinybench": "^2.8.0",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
   }
 }
+
