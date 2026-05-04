@@ -102,16 +102,21 @@ export class InternalError extends DomainError {
   readonly httpStatus = 500;
 }
 
-/** Map common Jupiter / network failures to a `DomainError`. */
+/** Map common Jupiter / network failures to a `DomainError`.
+ *  The `message` argument (when provided) is the authoritative error text and
+ *  is matched first; only then do we fall back to scanning the serialized body
+ *  (which may contain false positives like `slippageBps: 50`). */
 export function fromUpstream(status: number, body: unknown, message?: string): DomainError {
   const text = typeof body === 'string' ? body : JSON.stringify(body ?? {});
   const merged = `${message ?? 'Upstream error'} [${status}]: ${text.slice(0, 400)}`;
+  const probe = (message ?? '') + ' ' + text;
   if (status === 429) return new RateLimitedError(merged, body);
   if (status === 408 || status === 504) return new UpstreamTimeoutError(merged, body);
-  if (/slippage/i.test(text)) return new SlippageExceededError(merged, body);
-  if (/blockhash/i.test(text)) return new BlockhashExpiredError(merged, body);
-  if (/insufficient/i.test(text)) return new InsufficientBalanceError(merged, body);
-  if (/simulation/i.test(text)) return new SimulationFailedError(merged, body);
+  if (/insufficient/i.test(probe)) return new InsufficientBalanceError(merged, body);
+  if (/blockhash/i.test(probe)) return new BlockhashExpiredError(merged, body);
+  if (/slippage (tolerance|exceeded|too)/i.test(probe))
+    return new SlippageExceededError(merged, body);
+  if (/simulation/i.test(probe)) return new SimulationFailedError(merged, body);
   if (status >= 500) return new UpstreamError(merged, body);
   return new InvalidInputError(merged, body);
 }

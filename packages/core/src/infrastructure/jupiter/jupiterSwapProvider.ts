@@ -5,7 +5,7 @@ import type {
   OrderStatus,
   SwapOrder,
 } from '../../domain/entities.js';
-import { DomainError, InternalError } from '../../domain/errors.js';
+import { DomainError, fromUpstream, InternalError } from '../../domain/errors.js';
 import type { SwapProvider } from '../../domain/ports.js';
 import { err, ok, type Result } from '../../domain/types/result.js';
 import {
@@ -39,6 +39,14 @@ export class JupiterSwapProvider implements SwapProvider {
       });
       upstreamLatency.observe({ endpoint: 'order', outcome: 'ok' }, Date.now() - start);
 
+      // Ultra returns 200 with embedded error fields when it cannot produce
+      // a transaction (e.g. "Insufficient funds"). Translate those into our
+      // typed DomainError hierarchy.
+      const embeddedError = dto.errorMessage ?? dto.error;
+      if (embeddedError || dto.transaction.length === 0) {
+        return err(fromUpstream(400, dto, embeddedError ?? 'Jupiter returned no transaction'));
+      }
+
       const order: SwapOrder = {
         requestId: requestId(dto.requestId),
         transaction: base64Tx(dto.transaction),
@@ -60,12 +68,13 @@ export class JupiterSwapProvider implements SwapProvider {
             inAmount: s.swapInfo.inAmount,
             outAmount: s.swapInfo.outAmount,
             feeAmount: s.swapInfo.feeAmount,
-            feeMint: s.swapInfo.feeMint as MintAddress,
+            feeMint: (s.swapInfo.feeMint || s.swapInfo.outputMint) as MintAddress,
           },
         })),
         contextSlot: dto.contextSlot,
         prioritizationFeeLamports: dto.prioritizationFeeLamports,
         expiresAt: dto.expiresAt,
+        lastValidBlockHeight: dto.lastValidBlockHeight,
         status: 'Created',
       };
       return ok(order);
@@ -81,6 +90,7 @@ export class JupiterSwapProvider implements SwapProvider {
       const dto = await this.client.executeOrder({
         requestId: params.requestId,
         signedTransaction: params.signedTransaction,
+        lastValidBlockHeight: params.lastValidBlockHeight,
       });
       upstreamLatency.observe({ endpoint: 'execute', outcome: 'ok' }, Date.now() - start);
       return ok({

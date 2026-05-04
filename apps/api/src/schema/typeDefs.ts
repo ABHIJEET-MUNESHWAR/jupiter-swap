@@ -36,6 +36,7 @@ export const typeDefs = /* GraphQL */ `
     contextSlot: BigIntString
     prioritizationFeeLamports: BigIntString
     expiresAt: DateTime
+    lastValidBlockHeight: BigIntString
     status: OrderStatus!
   }
 
@@ -81,6 +82,7 @@ export const typeDefs = /* GraphQL */ `
   input ExecuteOrderInput {
     requestId: ID!
     signedTransaction: String!
+    lastValidBlockHeight: BigIntString
   }
 
   type Query {

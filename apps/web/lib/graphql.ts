@@ -16,6 +16,7 @@ export const CREATE_ORDER = gql`
       slippageBps
       priceImpactPct
       status
+      lastValidBlockHeight
       routePlan {
         percent
         swapInfo { label inputMint outputMint inAmount outAmount }

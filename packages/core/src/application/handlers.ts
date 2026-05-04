@@ -20,6 +20,7 @@ export interface ExecuteOrderCommand extends Command<ExecuteResult> {
   readonly type: 'ExecuteOrder';
   readonly requestId: RequestId;
   readonly signedTransaction: Base64Tx;
+  readonly lastValidBlockHeight?: string;
   readonly rateLimitKey: string;
 }
 export const ExecuteOrderCommandType = 'ExecuteOrder' as const;
@@ -88,6 +89,7 @@ export class ExecuteOrderHandler implements CommandHandler<ExecuteOrderCommand, 
     const result = await this.provider.executeOrder({
       requestId: cmd.requestId,
       signedTransaction: cmd.signedTransaction,
+      lastValidBlockHeight: cmd.lastValidBlockHeight,
     });
 
     return match(result, {

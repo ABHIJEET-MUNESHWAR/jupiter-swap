@@ -29,6 +29,9 @@
             "if (json.data && json.data.createOrder) {",
             "  pm.environment.set('requestId', json.data.createOrder.requestId);",
             "  pm.environment.set('transaction', json.data.createOrder.transaction);",
+            "  if (json.data.createOrder.lastValidBlockHeight) {",
+            "    pm.environment.set('lastValidBlockHeight', json.data.createOrder.lastValidBlockHeight);",
+            "  }",
             "}"
           ]
         }
@@ -39,7 +42,7 @@
         "url": "{{baseUrl}}/graphql",
         "body": {
           "mode": "raw",
-          "raw": "{\"query\":\"mutation($i: CreateOrderInput!){ createOrder(input:$i){ requestId transaction inAmount outAmount priceImpactPct status } }\",\"variables\":{\"i\":{\"inputMint\":\"{{inputMint}}\",\"outputMint\":\"{{outputMint}}\",\"amount\":\"{{amount}}\",\"taker\":\"{{taker}}\",\"slippageBps\":50}}}"
+          "raw": "{\"query\":\"mutation($i: CreateOrderInput!){ createOrder(input:$i){ requestId transaction lastValidBlockHeight inAmount outAmount priceImpactPct status } }\",\"variables\":{\"i\":{\"inputMint\":\"{{inputMint}}\",\"outputMint\":\"{{outputMint}}\",\"amount\":\"{{amount}}\",\"taker\":\"{{taker}}\",\"slippageBps\":50}}}"
         }
       }
     },
@@ -51,7 +54,7 @@
         "url": "{{baseUrl}}/graphql",
         "body": {
           "mode": "raw",
-          "raw": "{\"query\":\"mutation($i: ExecuteOrderInput!){ executeOrder(input:$i){ status signature error } }\",\"variables\":{\"i\":{\"requestId\":\"{{requestId}}\",\"signedTransaction\":\"{{signedTransaction}}\"}}}"
+          "raw": "{\"query\":\"mutation($i: ExecuteOrderInput!){ executeOrder(input:$i){ status signature error } }\",\"variables\":{\"i\":{\"requestId\":\"{{requestId}}\",\"signedTransaction\":\"{{signedTransaction}}\",\"lastValidBlockHeight\":\"{{lastValidBlockHeight}}\"}}}"
         }
       }
     },

@@ -7,8 +7,9 @@ export const SwapInfoDto = z.object({
   outputMint: z.string(),
   inAmount: z.coerce.string(),
   outAmount: z.coerce.string(),
-  feeAmount: z.coerce.string(),
-  feeMint: z.string(),
+  // Ultra returns these at the top-level of the order, not per-step.
+  feeAmount: z.coerce.string().optional().default('0'),
+  feeMint: z.string().optional().default(''),
 });
 
 export const RoutePlanStepDto = z.object({
@@ -31,6 +32,12 @@ export const OrderResponseDto = z.object({
   contextSlot: z.coerce.string().optional(),
   prioritizationFeeLamports: z.coerce.string().optional(),
   expiresAt: z.string().optional(),
+  // Swap V2 returns the latest blockhash window — must be passed back to /execute.
+  lastValidBlockHeight: z.coerce.string().optional(),
+  // Upstream-embedded error fields (200-OK with errorCode != 0 on failure).
+  errorCode: z.number().optional(),
+  errorMessage: z.string().optional(),
+  error: z.string().optional(),
 });
 export type OrderResponseDtoT = z.infer<typeof OrderResponseDto>;
 

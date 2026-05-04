@@ -13,7 +13,7 @@ const EnvSchema = z.object({
 
   SOLANA_RPC_URL: z.string().url().default('https://api.mainnet-beta.solana.com'),
 
-  JUPITER_BASE_URL: z.string().url().default('https://lite-api.jup.ag'),
+  JUPITER_BASE_URL: z.string().url().default('https://api.jup.ag'),
   JUPITER_API_KEY: z.string().optional(),
   JUPITER_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
   JUPITER_MAX_RETRIES: z.coerce.number().int().min(0).max(10).default(3),

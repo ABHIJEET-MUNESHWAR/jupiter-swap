@@ -42,6 +42,8 @@ export interface SwapOrder {
   readonly contextSlot?: string;
   readonly prioritizationFeeLamports?: string;
   readonly expiresAt?: string;
+  /** Swap V2: must be echoed back to `/execute`. */
+  readonly lastValidBlockHeight?: string;
   readonly status: OrderStatus;
 }
 
@@ -58,6 +60,7 @@ export interface CreateOrderParams {
 export interface ExecuteOrderParams {
   readonly requestId: RequestId;
   readonly signedTransaction: Base64Tx;
+  readonly lastValidBlockHeight?: string;
 }
 
 export interface ExecuteResult {

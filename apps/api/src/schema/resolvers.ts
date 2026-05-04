@@ -83,7 +83,7 @@ export const resolvers = {
 
     executeOrder: async (
       _: unknown,
-      args: { input: { requestId: string; signedTransaction: string } },
+      args: { input: { requestId: string; signedTransaction: string; lastValidBlockHeight?: string } },
       ctx: GraphQLContext,
     ) => {
       try {
@@ -92,6 +92,9 @@ export const resolvers = {
           rateLimitKey: ctx.requestKey,
           requestId: requestId(args.input.requestId),
           signedTransaction: base64Tx(args.input.signedTransaction),
+          ...(args.input.lastValidBlockHeight
+            ? { lastValidBlockHeight: args.input.lastValidBlockHeight }
+            : {}),
         };
         return await ctx.container.commandBus.dispatch(cmd);
       } catch (e) {

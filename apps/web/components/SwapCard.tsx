@@ -37,6 +37,7 @@ export function SwapCard() {
   const [quote, setQuote] = useState<{
     requestId: string; transaction: string;
     outAmount: string; priceImpactPct: number;
+    lastValidBlockHeight?: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [executing, setExecuting] = useState(false);
@@ -104,7 +105,13 @@ export function SwapCard() {
       const res = await gqlClient.request<{
         executeOrder: { status: string; signature?: string; error?: string };
       }>(EXECUTE_ORDER as never, {
-        input: { requestId: quote.requestId, signedTransaction: serialized },
+        input: {
+          requestId: quote.requestId,
+          signedTransaction: serialized,
+          ...(quote.lastValidBlockHeight
+            ? { lastValidBlockHeight: quote.lastValidBlockHeight }
+            : {}),
+        },
       });
       if (res.executeOrder.status === 'Success' && res.executeOrder.signature) {
         toast.success(`Swap successful 🚀`, {

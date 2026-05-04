@@ -2,7 +2,7 @@ import { HttpClient } from '../infrastructure/http/httpClient.js';
 import { JupiterUltraClient } from '../infrastructure/jupiter/jupiterUltraClient.js';
 import { JupiterSwapProvider } from '../infrastructure/jupiter/jupiterSwapProvider.js';
 import { mintAddress, requestId, base64Tx } from '../domain/types/brand.js';
-import { RateLimitedError, SlippageExceededError } from '../domain/errors.js';
+import { InsufficientBalanceError, RateLimitedError, SlippageExceededError } from '../domain/errors.js';
 
 const SOL = 'So11111111111111111111111111111111111111112';
 const USDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
@@ -69,6 +69,31 @@ describe('JupiterSwapProvider', () => {
     });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBeInstanceOf(SlippageExceededError);
+  });
+
+  it('translates embedded "Insufficient funds" 200-OK response into a typed error', async () => {
+    const fetchImpl = mockFetch(
+      () =>
+        new Response(
+          JSON.stringify({
+            ...validOrderResp,
+            transaction: '',
+            errorCode: 1,
+            errorMessage: 'Insufficient funds',
+            error: 'Insufficient funds',
+          }),
+          { status: 200 },
+        ),
+    );
+    const http = new HttpClient({
+      baseUrl: 'https://example.test', timeoutMs: 1000, maxRetries: 0, fetchImpl,
+    });
+    const provider = new JupiterSwapProvider(new JupiterUltraClient(http));
+    const r = await provider.createOrder({
+      inputMint: mintAddress(SOL), outputMint: mintAddress(USDC), amount: '1000',
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBeInstanceOf(InsufficientBalanceError);
   });
 
   it('executeOrder happy path', async () => {

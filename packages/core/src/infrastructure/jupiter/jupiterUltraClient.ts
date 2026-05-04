@@ -1,11 +1,14 @@
 import type { HttpClient } from '../http/httpClient.js';
 import { ExecuteResponseDto, OrderResponseDto, type ExecuteResponseDtoT, type OrderResponseDtoT } from './dto.js';
 
-/** Thin transport wrapper around the Jupiter Ultra REST endpoints.
+/** Thin transport wrapper around the Jupiter **Swap V2** REST endpoints.
  *
- *  Endpoints (per https://developers.jup.ag/docs/api-reference/swap):
- *    POST /ultra/v1/order
- *    POST /ultra/v1/execute
+ *  Endpoints (per https://dev.jup.ag/docs/api/swap-api):
+ *    GET  https://api.jup.ag/swap/v2/order   (header: x-api-key)
+ *    POST https://api.jup.ag/swap/v2/execute (header: x-api-key, body: { signedTransaction, requestId, lastValidBlockHeight })
+ *
+ *  The class name is preserved for backwards compatibility with callers and
+ *  tests; it now targets Swap V2 instead of the deprecated Ultra endpoints.
  */
 export interface JupiterOrderRequest {
   inputMint: string;
@@ -20,6 +23,7 @@ export interface JupiterOrderRequest {
 export interface JupiterExecuteRequest {
   signedTransaction: string;
   requestId: string;
+  lastValidBlockHeight?: string;
 }
 
 export class JupiterUltraClient {
@@ -28,9 +32,17 @@ export class JupiterUltraClient {
   async createOrder(req: JupiterOrderRequest): Promise<OrderResponseDtoT> {
     return this.http.request(
       {
-        method: 'POST',
-        path: '/ultra/v1/order',
-        body: req,
+        method: 'GET',
+        path: '/swap/v2/order',
+        query: {
+          inputMint: req.inputMint,
+          outputMint: req.outputMint,
+          amount: req.amount,
+          taker: req.taker,
+          referralAccount: req.referralAccount,
+          referralFee: req.referralFee,
+          slippageBps: req.slippageBps,
+        },
       },
       OrderResponseDto,
     );
@@ -40,7 +52,7 @@ export class JupiterUltraClient {
     return this.http.request(
       {
         method: 'POST',
-        path: '/ultra/v1/execute',
+        path: '/swap/v2/execute',
         body: req,
       },
       ExecuteResponseDto,
